@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from db import init_db
-from logic import show_all_day, insert_day
+from logic import show_all_day, insert_day, delete_day
 
 app = Flask(__name__)
 db = init_db(app)
@@ -34,12 +34,39 @@ def view_day():
    res = show_all_day(db)
    return jsonify(res)
 
-@app.route('/day/delete')
-def delete_day():
-   return "this is delete endpoint"
+@app.route('/day/delete', methods = ['POST'])
+def delete_day_handler():
+   #butuh info apa aja? id
+   # 1. Baca Requestnya
+   print(request.get_json())
+   body = request.get_json()
+   # 2. Validasi Requestnya
+   is_valid = delete_day_validation(body)
+   if not is_valid:
+      return {"Message": "Request tidak valid"}, 400
+   # 3. Laksanakan Requestnya 
+   rowCount = delete_day(db, body["id"])
+   # 4. Ngebalikin respon nya
+   if rowCount == 0:
+      result = {"message": "ID tidak ada", "jumlah_record_terhapus": rowCount}
+   else:
+      result = {"message": "Sukses Terhapus", "jumlah_record_terhapus": rowCount}
+   return result
 
 def create_day_validation(body) -> bool:
    expected_field = ["name", "allowed_hours"]
+   sent_field = list(body.keys())
+   
+   result = True
+   for body_field in sent_field:
+      if body_field in expected_field:
+         result = result and True  
+      else:
+         result = result and False
+   return result
+
+def delete_day_validation(body) -> bool:
+   expected_field = ["id"]
    sent_field = list(body.keys())
    
    result = True

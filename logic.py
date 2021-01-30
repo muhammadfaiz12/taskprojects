@@ -27,4 +27,13 @@ def insert_day(db, day, allowed_hours):
     cursor.execute(query)
     db.get_db().commit()
     return 
+
+def delete_day(db, id) -> int:
+    cursor = db.get_db().cursor()
+    query = "DELETE from days where id = {0};".format(id)
+    print(query)
+
+    cursor.execute(query)
+    db.get_db().commit()
+    return cursor.rowcount
     
